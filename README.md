@@ -16,3 +16,12 @@ Usage of gts:
   -p string
         Timestamp precision, default: 'ms'. Options: 's', 'ms', 'us', 'ns' (default "ms")
 ```
+
+run in shell directly
+
+```
+$ gts
+2017-12-27T09:29:37Z -> 1514366977392 (ms)
+$ 
+
+```
