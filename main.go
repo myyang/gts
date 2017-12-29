@@ -3,7 +3,10 @@ package main
 import (
 	"flag"
 	"fmt"
+	"os"
+	"os/signal"
 	"strconv"
+	"syscall"
 	"time"
 )
 
@@ -15,12 +18,15 @@ const (
 	defaultDateTime = "1970-01-01T00:00:00Z"
 )
 
-var precision = flag.String(
-	"p", "ms",
-	"Timestamp precision, default: 'ms'. Options: 's', 'ms', 'us', 'ns'")
-var datetime = flag.String(
-	"dt", defaultDateTime,
-	"UTC datetime string to parse. Format: RFC3339")
+var (
+	precision = flag.String(
+		"p", "ms",
+		"Timestamp precision, default: 'ms'. Options: 's', 'ms', 'us', 'ns'")
+	datetime = flag.String(
+		"dt", defaultDateTime,
+		"UTC datetime string to parse. Format: RFC3339")
+	ticker = flag.Int64("t", 0, "Follow ticker every given N second.")
+)
 
 func printTime(t time.Time) {
 	p, err := time.ParseDuration(fmt.Sprintf("1%v", *precision))
@@ -46,6 +52,21 @@ func main() {
 	if err == nil && dt.Unix() != 0 {
 		printTime(dt)
 		return
+	}
+
+	if *ticker != 0 {
+		ticker := time.NewTicker(time.Second * time.Duration(*ticker))
+		// Create Signal Channel
+		sigChan := make(chan os.Signal)
+		signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
+		for {
+			select {
+			case <-sigChan:
+				return
+			case <-ticker.C:
+				printTime(time.Now())
+			}
+		}
 	}
 
 	if len(flag.Args()) == 0 {
