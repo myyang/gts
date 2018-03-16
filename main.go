@@ -59,6 +59,7 @@ func main() {
 		// Create Signal Channel
 		sigChan := make(chan os.Signal)
 		signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
+		printTime(time.Now())
 		for {
 			select {
 			case <-sigChan:
