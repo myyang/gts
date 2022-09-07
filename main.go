@@ -21,7 +21,10 @@ const (
 var (
 	precision = flag.String(
 		"p", "ms",
-		"Timestamp precision, default: 'ms'. Options: 's', 'ms', 'us', 'ns'")
+		"Timestamp precision in output, default: 'ms'. Options: 's', 'ms', 'us', 'ns'")
+	parsePrecision = flag.String(
+		"pp", "s",
+		"Timestamp precision for parsing, default: 'ms'. Options: 's', 'ms', 'us', 'ns'")
 	datetime = flag.String(
 		"dt", defaultDateTime,
 		"UTC datetime string to parse. Format: RFC3339")
@@ -81,9 +84,16 @@ func main() {
 		return
 	}
 
-	for value < 1e18 {
-		value = value * 10
+	t := time.Unix(value, 0)
+	switch *parsePrecision {
+	case "ns":
+		t = time.Unix(0, value)
+	case "us":
+		t = time.UnixMicro(value)
+	case "ms":
+		t = time.UnixMilli(value)
 	}
-	printTime(time.Unix(0, value))
+
+	printTime(t)
 
 }
